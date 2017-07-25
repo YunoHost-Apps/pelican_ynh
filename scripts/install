@@ -49,15 +49,13 @@ ynh_app_setting_set $app is_public $is_public
 
 # Set SSOwat rules
 [[ $is_public -eq 1 ]] \
-  && ynh_app_setting_set "$app" skipped_uris "/"
-
-
-sudo apt-get install python-pip
+  && ynh_app_setting_set "$app" unprotected_uris "/"
 
 #=================================================
 # INSTALL PELICAN
 #=================================================
 
+sudo apt-get install python-pip
 pip install pelican markdown 
 
 # Copy and set nginx configuration
