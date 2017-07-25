@@ -18,7 +18,8 @@
     },
     "multi_instance": false,
     "services": [
-        "nginx"
+        "nginx",
+        "php5-fpm"
     ],
     "arguments": {
         "install" : [
@@ -38,17 +39,8 @@
                     "en": "Choose a path for Pelican",
                     "fr": "Choisissez un chemin pour Pelican"
                 },
-                "example": "/pelican",
-                "default": "/pelican"
-            },
-            {
-                "name": "admin",
-                "type": "user",
-                "ask": {
-                    "en": "Choose an author",
-                    "fr": "Choisissez l'auteur"
-                },
-                "example": "johndoe"
+                "example": "/site",
+                "default": "/site"
             },
             {
                 "name": "is_public",
@@ -58,15 +50,6 @@
                     "fr": "Est-ce une application publique ?"
                 },
                 "default": true
-            },
-            {
-                "name": "language",
-                "ask": {
-                    "en": "Choose the application language",
-                    "fr": "Choisissez la langue de l'application"
-                },
-                "choices": ["fr", "en"],
-                "default": "fr"
             }
         ]
     }
