@@ -58,7 +58,7 @@ ynh_app_setting_set $app is_public $is_public
 sudo apt-get install python-pip
 pip install pelican markdown
 
-mkdir -p $(DESTDIR)/www
+mkdir -p ${DESTDIR}/www
 
 # Copy and set nginx configuration
 nginx_conf="/etc/nginx/conf.d/${domain}.d/${app}.conf"
@@ -79,6 +79,6 @@ sudo systemctl reload php5-fpm
 sudo systemctl reload nginx
 
 # Post-installation
-cd $(DESTDIR)/www
-printf '\nDefault title\n$(author)\ny\n${domain}\n\n\n\n\n\n\n\n\n\n\n\n' | pelican-quickstart
+cd ${DESTDIR}/www
+printf '\n"Default title"\n"${author}"\ny\n"${domain}"\n\n\n\n\n\n\n\n\n\n\n\n' | pelican-quickstart
 pelican -s pelicanconf.py
