@@ -31,11 +31,13 @@ path=$YNH_APP_ARG_PATH
 is_public=$YNH_APP_ARG_IS_PUBLIC
 author=$YNH_APP_ARG_AUTHOR
 
-# Check domain/path availability
+#=================================================
+# CHECK DOMAIN/PATH AVAILABILITY & DESTDIR
+#=================================================
+
 sudo yunohost app checkurl "${domain}${path}" -a "$app" \
   || exit 1
 
-# Check destination directory
 DESTDIR="/var/www/${app}"
 [[ -d "$DESTDIR" ]] && ynh_die \
 "The destination directory '${DESTDIR}' already exists.\
@@ -45,22 +47,30 @@ DESTDIR="/var/www/${app}"
 # STORE SETTINGS FROM MANIFEST
 #=================================================
 
+ynh_app_setting_set $app domain $domain
+ynh_app_setting_set $app path $path
 ynh_app_setting_set $app is_public $is_public
+ynh_app_setting_set $app author $author
 
-# Set SSOwat rules
+#=================================================
+# SET SSOWAT RULES
+#=================================================
+
 [[ $is_public -eq 1 ]] \
   && ynh_app_setting_set "$app" unprotected_uris "/"
 
 #=================================================
-# INSTALL PELICAN
+# INSTALL PIP/PELICAN/MARKDOWN PACKAGES
 #=================================================
 
 sudo apt-get install python-pip
 pip install pelican markdown
-
 mkdir -p ${DESTDIR}/www
 
-# Copy and set nginx configuration
+#=================================================
+# COPY AND SET NGINX CONFIGURATION
+#=================================================
+
 nginx_conf="/etc/nginx/conf.d/${domain}.d/${app}.conf"
 sed -i "s@{PATH}@${path}@g"        ../conf/nginx.conf
 sed -i "s@{LOCATION}@${path:-/}@g" ../conf/nginx.conf
@@ -68,17 +78,26 @@ sed -i "s@{DESTDIR}@${DESTDIR}@g"  ../conf/nginx.conf
 sed -i "s@{POOLNAME}@${app}@g"     ../conf/nginx.conf
 sudo cp ../conf/nginx.conf "$nginx_conf"
 
-# Copy and set php-fpm configuration
+#=================================================
+# COPY AND SET PHP-FPM CONFIGURATION 
+#=================================================
+
 phpfpm_conf="/etc/php5/fpm/pool.d/${app}.conf"
 sed -i "s@{POOLNAME}@${app}@g"    ../conf/php-fpm.conf
 sed -i "s@{DESTDIR}@${DESTDIR}@g" ../conf/php-fpm.conf
 sudo cp ../conf/php-fpm.conf "$phpfpm_conf"
 
-# Reload services
+#=================================================
+# RELOAD SERVICES 
+#=================================================
+
 sudo systemctl reload php5-fpm
 sudo systemctl reload nginx
 
-# Post-installation
-cd ${DESTDIR}/www
-printf '\n"Default title"\n"${author}"\ny\n"${domain}"\n\n\n\n\n\n\n\n\n\n\n\n' | pelican-quickstart
-pelican -s pelicanconf.py
+#=================================================
+# POST-INSTALATION
+#=================================================
+
+# cd ${DESTDIR}/www
+# printf '\n"Default title"\n"${author}"\ny\n"${domain}"\n\n\n\n\n\n\n\n\n\n\n\n' | pelican-quickstart
+# pelican -s pelicanconf.py
