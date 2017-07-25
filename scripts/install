@@ -14,8 +14,14 @@ source /usr/share/yunohost/helpers
 # MANAGE SCRIPT FAILURE
 #=================================================
 
-# Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
+# Exit on command errors and treat unset variables as an error
+set -eu
+
+#=================================================
+# GET MULTI-INSTANCES SPECIFIC VARIABLES
+#=================================================
+
+app=$YNH_APP_INSTANCE_NAME
 
 #=================================================
 # RETRIEVE ARGUMENTS FROM THE MANIFEST
@@ -25,7 +31,6 @@ domain=$YNH_APP_ARG_DOMAIN
 path=$YNH_APP_ARG_PATH
 is_public=$YNH_APP_ARG_IS_PUBLIC
 
-app=$YNH_APP_INSTANCE_NAME
 
 # Check domain/path availability
 sudo yunohost app checkurl "${domain}${path}" -a "$app" \
