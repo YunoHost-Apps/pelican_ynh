@@ -23,7 +23,6 @@ ynh_abort_if_errors
 
 domain=$YNH_APP_ARG_DOMAIN
 path=$YNH_APP_ARG_PATH
-author=$YNH_APP_ARG_AUTHOR
 is_public=$YNH_APP_ARG_IS_PUBLIC
 
 app=$YNH_APP_INSTANCE_NAME
@@ -43,7 +42,6 @@ DESTDIR="/var/www/${app}"
 #=================================================
 
 ynh_app_setting_set $app is_public $is_public
-ynh_app_setting_set $app author $author
 
 # Set SSOwat rules
 [[ $is_public -eq 1 ]] \
