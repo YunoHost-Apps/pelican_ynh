@@ -43,6 +43,15 @@
                 "default": "/site"
             },
             {
+                "name": "author",
+                "type": "user",
+                "ask": {
+                    "en": "Choose an author",
+                    "fr": "Choisissez l'auteur"
+                },
+                "example": "johndoe"
+            },
+            {
                 "name": "is_public",
                 "type": "boolean",
                 "ask": {
