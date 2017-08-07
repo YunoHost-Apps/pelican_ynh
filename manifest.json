@@ -3,20 +3,20 @@
     "id": "pelican",
     "packaging_format": 1,
     "description": {
-        "en": "Pelican package for YunoHost application.",
-        "fr": "Package de l'application Pelican pour YunoHost."
+        "en": "Pelican Static Site Generator",
+        "fr": "Pelican, un générateur de blog statique"
     },
-    "url": "https://example.com",
+    "url": "https://thegoldenkoala.com",
     "license": "free",
     "maintainer": {
         "name": "Ylies Chahi",
         "email": "ylieschahi@gmail.com",
-        "url": "http://example.com"
+        "url": "http://thegoldenkoala.com"
     },
     "requirements": {
         "yunohost": ">> 2.5.6"
     },
-    "multi_instance": false,
+    "multi_instance": true,
     "services": [
         "nginx",
         "php5-fpm"
