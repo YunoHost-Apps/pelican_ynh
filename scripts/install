@@ -1,40 +1,20 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
+# Source app helpers and functions
 source _common.sh
 source /usr/share/yunohost/helpers
-
-#=================================================
-# MANAGE SCRIPT FAILURE
-#=================================================
 
 # Exit on command errors and treat unset variables as an error
 set -eu
 
-#=================================================
-# GET MULTI-INSTANCES SPECIFIC VARIABLES
-#=================================================
-
+# Retrieve arguments
 app=$YNH_APP_INSTANCE_NAME
-
-#=================================================
-# RETRIEVE ARGUMENTS FROM THE MANIFEST
-#=================================================
-
 domain=$YNH_APP_ARG_DOMAIN
 path=$YNH_APP_ARG_PATH
 is_public=$YNH_APP_ARG_IS_PUBLIC
 author=$YNH_APP_ARG_AUTHOR
 
-#=================================================
-# CHECK DOMAIN/PATH AVAILABILITY & DESTDIR
-#=================================================
-
+# Check domain/path availability
 sudo yunohost app checkurl "${domain}${path}" -a "$app" \
   || exit 1
 
@@ -43,33 +23,24 @@ DESTDIR="/var/www/${app}"
 "The destination directory '${DESTDIR}' already exists.\
  You should safely delete it before installing this app."
 
-#=================================================
-# STORE SETTINGS FROM MANIFEST
-#=================================================
-
+# Store settings from manifest
 ynh_app_setting_set $app domain $domain
 ynh_app_setting_set $app path $path
 ynh_app_setting_set $app is_public $is_public
 ynh_app_setting_set $app author $author
 
-#=================================================
-# SET SSOWAT RULES
-#=================================================
+# Install python dependencies
+  sudo apt-get install -y python-pip python-virtualenv python-dev libldap2-dev libsasl2-dev libssl-dev
+  
+# Create the virtualenv
+virtualenv ${DESTDIR}
+cd ${DESTDIR}
+source bin/activate
 
-[[ $is_public -eq 1 ]] \
-  && ynh_app_setting_set "$app" unprotected_uris "/"
-
-#=================================================
-# INSTALL PIP/PELICAN/MARKDOWN PACKAGES
-#=================================================
-
-sudo apt-get install python-pip
+# Install pelican
 pip install pelican markdown
 
-#=================================================
-# COPY AND SET NGINX CONFIGURATION
-#=================================================
-
+# Configure Nginx
 nginx_conf="/etc/nginx/conf.d/${domain}.d/${app}.conf"
 sed -i "s@{PATH}@${path}@g"        ../conf/nginx.conf
 sed -i "s@{LOCATION}@${path:-/}@g" ../conf/nginx.conf
@@ -77,26 +48,7 @@ sed -i "s@{DESTDIR}@${DESTDIR}@g"  ../conf/nginx.conf
 sed -i "s@{POOLNAME}@${app}@g"     ../conf/nginx.conf
 sudo cp ../conf/nginx.conf "$nginx_conf"
 
-#=================================================
-# COPY AND SET PHP-FPM CONFIGURATION 
-#=================================================
+sudo nginx -t && sudo service nginx reload
 
-phpfpm_conf="/etc/php5/fpm/pool.d/${app}.conf"
-sed -i "s@{POOLNAME}@${app}@g"    ../conf/php-fpm.conf
-sed -i "s@{DESTDIR}@${DESTDIR}@g" ../conf/php-fpm.conf
-sudo cp ../conf/php-fpm.conf "$phpfpm_conf"
-
-#=================================================
-# RELOAD SERVICES 
-#=================================================
-
-sudo systemctl reload php5-fpm
-sudo systemctl reload nginx
-
-#=================================================
-# POST-INSTALATION
-#=================================================
-
-# cd ${DESTDIR}/www
-# printf '\n"Default title"\n"${author}"\ny\n"${domain}"\n\n\n\n\n\n\n\n\n\n\n\n' | pelican-quickstart
-# pelican -s pelicanconf.py
+[[ $is_public -eq 1 ]] \
+  && ynh_app_setting_set "$app" unprotected_uris "/"
