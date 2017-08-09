@@ -30,12 +30,7 @@ ynh_app_setting_set $app is_public $is_public
 ynh_app_setting_set $app author $author
 
 # Install python dependencies
-  sudo apt-get install -y python-pip python-virtualenv python-dev libldap2-dev libsasl2-dev libssl-dev
-  
-# Create the virtualenv
-virtualenv ${DESTDIR}
-cd ${DESTDIR}
-source bin/activate
+sudo apt-get install -y python-pip python-virtualenv python-dev libldap2-dev libsasl2-dev libssl-dev
 
 # Install pelican
 pip install pelican markdown
