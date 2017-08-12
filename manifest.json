@@ -18,8 +18,7 @@
     },
     "multi_instance": false,
     "services": [
-        "nginx",
-        "php5-fpm"
+        "nginx"
     ],
     "arguments": {
         "install" : [
@@ -39,8 +38,8 @@
                     "en": "Choose a path for Pelican",
                     "fr": "Choisissez un chemin pour Pelican"
                 },
-                "example": "/site",
-                "default": "/site"
+                "example": "/pelican",
+                "default": "/pelican"
             },
             {
                 "name": "author",
@@ -50,6 +49,14 @@
                     "fr": "Choisissez l'auteur"
                 },
                 "example": "johndoe"
+            },
+            {
+            "name": "title",
+            "ask": {
+                "en": "Choose a default title for your website",
+                "fr": "Choisissez le titre par défaut de votre site"
+            },
+            "example": "My personal website"
             },
             {
                 "name": "is_public",
