@@ -13,15 +13,21 @@ domain=$YNH_APP_ARG_DOMAIN
 path=$YNH_APP_ARG_PATH
 is_public=$YNH_APP_ARG_IS_PUBLIC
 author=$YNH_APP_ARG_AUTHOR
+title=$YNH_APP_ARG_TITLE
+
+# Remove trailing slash to path
+path=${path%/}
+#force location to be / or /foo
+location=${path:-/}
 
 # Check domain/path availability
-sudo yunohost app checkurl "${domain}${path}" -a "$app" \
-  || exit 1
+sudo yunohost app checkurl $domain$path -a $app \
+    || (echo "Path not available: $domain$path" && exit 1)
 
-DESTDIR="/var/www/${app}"
-[[ -d "$DESTDIR" ]] && ynh_die \
-"The destination directory '${DESTDIR}' already exists.\
- You should safely delete it before installing this app."
+# Document root
+document_root=/var/www/$app
+sudo mkdir -p $document_root
+sudo cp -a ../sources/* $document_root
 
 # Store settings from manifest
 ynh_app_setting_set $app domain $domain
@@ -34,19 +40,25 @@ sudo apt-get install -y python-pip python-virtualenv python-dev libldap2-dev lib
 
 # Install pelican
 pip install pelican markdown
-mkdir -p ${DESTDIR}
-# cd ${DESTDIR}
-# git clone https://github.com/YliesC/website.git .
 
-# Configure Nginx
-nginx_conf="/etc/nginx/conf.d/${domain}.d/${app}.conf"
-sed -i "s@{PATH}@${path}@g"        ../conf/nginx.conf
-sed -i "s@{LOCATION}@${path:-/}@g" ../conf/nginx.conf
-sed -i "s@{DESTDIR}@${DESTDIR}@g"  ../conf/nginx.conf
-sed -i "s@{POOLNAME}@${app}@g"     ../conf/nginx.conf
-sudo cp ../conf/nginx.conf "$nginx_conf"
+# Generate the blog
+sudo sed -i "s@https://example.fr@https://$domain@g" publishconf.py
+sudo sed -i "s@YNH_APP_AUTHOR@$author@g" publishconf.py
+sudo sed -i "s@YNH_APP_SITENAME@$title@g" publishconf.py
+pelican -s publishconf.py
 
-sudo nginx -t && sudo service nginx reload
+# Set permissions
+sudo chmod 775 -R $document_root
+sudo chown -hR www-data:www-data $document_root
 
+# Nginx configuration
+sed -i "s@YNH_LOCATION@$location@g" ../conf/nginx.conf
+sed -i "s@YNH_DOCUMENT_ROOT@$document_root/@g" ../conf/nginx.conf
+sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+
+# Make app public if necessary
 [[ $is_public -eq 1 ]] \
   && ynh_app_setting_set "$app" unprotected_uris "/"
+  
+# Reload Nginx and regenerate SSOwat conf
+sudo service nginx reload
