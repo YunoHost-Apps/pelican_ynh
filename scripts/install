@@ -50,7 +50,7 @@ pip install pelican markdown
 
 # Generate the blog
 cd $document_root
-pelican -s pelicanconf.py
+pelican -s pelicanconf.py -D
 
 # Set permissions
 sudo chmod 775 -R $document_root
