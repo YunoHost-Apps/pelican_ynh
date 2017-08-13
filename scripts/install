@@ -28,6 +28,7 @@ sudo mkdir -p $document_root
 sudo sed -i "s@YNH_APP_URL@https://$domain@g" ../sources/pelicanconf.py
 sudo sed -i "s@YNH_APP_AUTHOR@$author@g" ../sources/pelicanconf.py
 sudo sed -i "s@YNH_APP_SITENAME@$title@g" ../sources/pelicanconf.py
+sudo sed -i "s@YNH_APP_AUTHOR@$author@g" ../sources/content/first-article.md
 sudo cp -a ../sources/* $document_root
 
 cd $document_root
