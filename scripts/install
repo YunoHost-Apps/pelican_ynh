@@ -24,11 +24,13 @@ sudo yunohost app checkurl $domain$path -a $app \
 
 # Document root
 document_root=/var/www/$app
+date=`date +%Y-%m-%d`
 sudo mkdir -p $document_root
 sudo sed -i "s@YNH_APP_URL@https://$domain@g" ../sources/pelicanconf.py
 sudo sed -i "s@YNH_APP_AUTHOR@$author@g" ../sources/pelicanconf.py
 sudo sed -i "s@YNH_APP_SITENAME@$title@g" ../sources/pelicanconf.py
 sudo sed -i "s@YNH_APP_AUTHOR@$author@g" ../sources/content/first-article.md
+sudo sed -i "s@YNH_APP_DATE@$date@g" ../sources/content/first-article.md
 sudo cp -a ../sources/* $document_root
 
 # Nginx configuration
