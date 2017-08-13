@@ -15,8 +15,6 @@ is_public=$YNH_APP_ARG_IS_PUBLIC
 author=$YNH_APP_ARG_AUTHOR
 title=$YNH_APP_ARG_TITLE
 
-# Remove trailing slash to path
-path=${path%/}
 #force location to be / or /foo
 location=${path:-/}
 
