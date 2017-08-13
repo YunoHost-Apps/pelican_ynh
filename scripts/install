@@ -31,7 +31,10 @@ sudo sed -i "s@YNH_APP_SITENAME@$title@g" ../sources/pelicanconf.py
 sudo sed -i "s@YNH_APP_AUTHOR@$author@g" ../sources/content/first-article.md
 sudo cp -a ../sources/* $document_root
 
-cd $document_root
+# Nginx configuration
+sed -i "s@YNH_LOCATION@$location@g" ../conf/nginx.conf
+sed -i "s@YNH_DOCUMENT_ROOT@$document_root/@g" ../conf/nginx.conf
+sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
 # Store settings from manifest
 ynh_app_setting_set $app domain $domain
@@ -46,16 +49,12 @@ sudo apt-get install -y python-pip python-virtualenv python-dev libldap2-dev lib
 pip install pelican markdown
 
 # Generate the blog
+cd $document_root
 pelican -s pelicanconf.py
 
 # Set permissions
 sudo chmod 775 -R $document_root
 sudo chown -hR www-data:www-data $document_root
-
-# Nginx configuration
-sed -i "s@YNH_LOCATION@$location@g" ../conf/nginx.conf
-sed -i "s@YNH_DOCUMENT_ROOT@$document_root/@g" ../conf/nginx.conf
-sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
 # Make app public if necessary
 [[ $is_public -eq 1 ]] \
