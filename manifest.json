@@ -7,14 +7,14 @@
         "fr": "Pelican, un générateur de blog statique"
     },
     "url": "https://thegoldenkoala.com",
-    "license": "free",
+    "license": "GPLv3",
     "maintainer": {
         "name": "Ylies Chahi",
         "email": "ylieschahi@gmail.com",
         "url": "http://thegoldenkoala.com"
     },
     "requirements": {
-        "yunohost": ">> 2.5.6"
+        "yunohost": ">> 2.6.5"
     },
     "multi_instance": false,
     "services": [
