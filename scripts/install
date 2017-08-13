@@ -1,11 +1,10 @@
 #!/bin/bash
 
-# Source app helpers and functions
-source _common.sh
-source /usr/share/yunohost/helpers
-
 # Exit on command errors and treat unset variables as an error
 set -eu
+
+# Source app helpers and functions
+source /usr/share/yunohost/helpers
 
 # Retrieve arguments
 app=$YNH_APP_INSTANCE_NAME
@@ -20,7 +19,7 @@ location=${path:-/}
 
 # Check domain/path availability
 sudo yunohost app checkurl $domain$path -a $app \
-    || (echo "Path not available: $domain$path" && exit 1)
+    || ynh_die "The path ${domain}${path} is not available for app installation."
 
 # Document root
 document_root=/var/www/$app
