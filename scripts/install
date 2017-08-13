@@ -33,7 +33,7 @@ sudo cp -a ../sources/* $document_root
 
 # Nginx configuration
 sed -i "s@YNH_LOCATION@$location@g" ../conf/nginx.conf
-sed -i "s@YNH_DOCUMENT_ROOT@$document_root/output@g" ../conf/nginx.conf
+sed -i "s@YNH_DOCUMENT_ROOT@$document_root/output/@g" ../conf/nginx.conf
 sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
 
 # Store settings from manifest
