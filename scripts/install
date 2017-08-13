@@ -31,7 +31,7 @@ sudo sed -i "s@YNH_APP_AUTHOR@$author@g" ../sources/pelicanconf.py
 sudo sed -i "s@YNH_APP_SITENAME@$title@g" ../sources/pelicanconf.py
 sudo sed -i "s@YNH_APP_AUTHOR@$author@g" ../sources/content/first-article.md
 sudo sed -i "s@YNH_APP_DATE@$date@g" ../sources/content/first-article.md
-sudo cp -a ../sources/* $document_root
+sudo cp -a ../sources/. $document_root
 
 # Nginx configuration
 sed -i "s@YNH_LOCATION@$location@g" ../conf/nginx.conf
