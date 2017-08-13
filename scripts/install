@@ -15,8 +15,6 @@ is_public=$YNH_APP_ARG_IS_PUBLIC
 author=$YNH_APP_ARG_AUTHOR
 title=$YNH_APP_ARG_TITLE
 
-# Remove trailing slash to path
-path=${path%/}
 #force location to be / or /foo
 location=${path:-/}
 
@@ -27,9 +25,9 @@ sudo yunohost app checkurl $domain$path -a $app \
 # Document root
 document_root=/var/www/$app
 sudo mkdir -p $document_root
-sudo sed -i "s@https://example.fr@https://$domain@g" ../sources/publishconf.py
-sudo sed -i "s@YNH_APP_AUTHOR@$author@g" ../sources/publishconf.py
-sudo sed -i "s@YNH_APP_SITENAME@$title@g" ../sources/publishconf.py
+sudo sed -i "s@YNH_APP_URL@https://$domain@g" ../sources/pelicanconf.py
+sudo sed -i "s@YNH_APP_AUTHOR@$author@g" ../sources/pelicanconf.py
+sudo sed -i "s@YNH_APP_SITENAME@$title@g" ../sources/pelicanconf.py
 sudo cp -a ../sources/* $document_root
 
 cd $document_root
@@ -47,7 +45,7 @@ sudo apt-get install -y python-pip python-virtualenv python-dev libldap2-dev lib
 pip install pelican markdown
 
 # Generate the blog
-pelican -s publishconf.py
+pelican -s pelicanconf.py
 
 # Set permissions
 sudo chmod 775 -R $document_root
