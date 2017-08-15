@@ -6,6 +6,7 @@
         "en": "Pelican Static Site Generator",
         "fr": "Pelican, un générateur de blog statique"
     },
+    "version": "3.7.1",
     "url": "https://thegoldenkoala.com",
     "license": "GPLv3",
     "maintainer": {
@@ -14,9 +15,9 @@
         "url": "http://thegoldenkoala.com"
     },
     "requirements": {
-        "yunohost": ">> 2.6.5"
+            "yunohost": ">= 2.4"
     },
-    "multi_instance": false,
+    "multi_instance": true,
     "services": [
         "nginx"
     ],
