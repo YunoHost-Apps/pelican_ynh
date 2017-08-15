@@ -42,9 +42,9 @@ sudo cp -a ./www "$DESTDIR"
 sudo cp -a ./conf/nginx.conf "$NGINX_CONF"
 
 # Make app public if necessary
-if [[ "$is_public" -ne 0 ]];
-then
-    sudo yunohost app setting $app unprotected_uris -v "/"
+[[ $is_public -eq 1 ]] \
+  && ynh_app_setting_set "$app" unprotected_uris "/"
+
 fi
 
 # Reload Nginx and regenerate SSOwat conf
