@@ -1,45 +1,72 @@
 #!/bin/bash
 
-# Exit on command errors and treat access to unset variables as an error
-set -eu
+#=================================================
+# GENERIC START
+#=================================================
+# IMPORT GENERIC HELPERS
+#=================================================
 
-# Source app helpers and functions
 source /usr/share/yunohost/helpers
+
+#=================================================
+# MANAGE SCRIPT FAILURE
+#=================================================
+
+# Exit if an error occurs during the execution of the script
+ynh_abort_if_errors
+
+#=================================================
+# LOAD SETTINGS
+#=================================================
 
 app=$YNH_APP_INSTANCE_NAME
 
-# Retrieve arguments
-domain=$(ynh_app_setting_get "$app" domain)
-path=$(ynh_app_setting_get "$app" path)
-is_public=$(ynh_app_setting_get "$app" is_public)
+domain=$(ynh_app_setting_get $app domain)
+path_url=$(ynh_app_setting_get $app path)
+final_path=$(ynh_app_setting_get $app final_path)
 
-# is_public is now a boolean field
+# is_public is now a boolean field
 if [ "$is_public" = "Yes" ];
 then
     is_public=1
 fi
 
-# Check domain/path availability
-sudo yunohost app checkurl $domain$path -a $app \
-  || ynh_die "The path ${domain}${path} is not available for app installation."
+#=================================================
+# CHECK IF THE APP CAN BE RESTORED
+#=================================================
 
-# Check destination directory
-DESTDIR="/var/www/$app"
-[[ -d $DESTDIR ]] && ynh_die \
-"The destination directory '$DESTDIR' already exists.\
- You should safely delete it before restoring this app."
+ynh_webpath_available $domain $path_url \
+	|| ynh_die "Path not available: ${domain}${path_url}"
+test ! -d $final_path \
+	|| ynh_die "There is already a directory: $final_path "
 
-# Check configuration files
-NGINX_CONF="/etc/nginx/conf.d/${domain}.d/${app}.conf"
-[[ -f $NGINX_CONF ]] && ynh_die \
-"The NGINX configuration already exists at '${NGINX_CONF}'.
- You should safely delete it before restoring this app."
+#=================================================
+# STANDARD RESTORATION STEPS
+#=================================================
+# RESTORE THE NGINX CONFIGURATION
+#=================================================
 
-# Restore the app files
-sudo cp -a ./www "$DESTDIR"
+ynh_restore_file "/etc/nginx/conf.d/$domain.d/$app.conf"
 
-# Restore configuration files
-sudo cp -a ./conf/nginx.conf "$NGINX_CONF"
+#=================================================
+# RESTORE THE APP MAIN DIR
+#=================================================
+
+ynh_restore_file "$final_path"
+
+#=================================================
+# RESTORE USER RIGHTS
+#=================================================
+
+# Restore permissions on app files
+chown -R root: $final_path
+
+#=================================================
+# ADVERTISE SERVICE IN ADMIN PANEL
+#=================================================
+
+yunohost service add $app --log "/var/log/$app/APP.log"
+
 
 # Make app public if necessary
 [[ $is_public -eq 1 ]] \
@@ -47,5 +74,10 @@ sudo cp -a ./conf/nginx.conf "$NGINX_CONF"
 
 fi
 
-# Reload Nginx and regenerate SSOwat conf
-sudo service nginx reload
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# RELOAD NGINX AND PHP-FPM
+#=================================================
+
+systemctl reload nginx

@@ -6,16 +6,16 @@
         "en": "Pelican Static Site Generator",
         "fr": "Pelican, un générateur de blog statique"
     },
-    "version": "3.7.1",
+    "version": "1.0",
     "url": "https://thegoldenkoala.com",
-    "license": "GPLv3",
+    "license": "free",
     "maintainer": {
         "name": "Ylies Chahi",
         "email": "ylieschahi@gmail.com",
         "url": "http://thegoldenkoala.com"
     },
     "requirements": {
-            "yunohost": ">= 2.4"
+            "yunohost": ">= 2.7.2"
     },
     "multi_instance": true,
     "services": [
@@ -49,7 +49,8 @@
                     "en": "Choose an author",
                     "fr": "Choisissez l'auteur"
                 },
-                "example": "johndoe"
+                "example": "johndoe",
+		"default": "John Doe"
             },
             {
             "name": "title",
