@@ -7,9 +7,9 @@
 		admin="john"	(USER)
 		language="fr"
 		is_public=1	(PUBLIC|public=1|private=0)
-		author="john"
-	password="pass"
-	port="666"	(PORT)
+		author="john"   (USER)
+		password="pass"
+		port="666"	(PORT)
 	; Checks
 		pkg_linter=1
 		setup_sub_dir=1
@@ -28,7 +28,7 @@
 	Level 2=auto
 	Level 3=auto
 # Level 4: 
-	Level 4=0
+	Level 4=1
 # Level 5: 
 	Level 5=auto
 	Level 6=auto
