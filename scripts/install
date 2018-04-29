@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Here are some advices about the packaging:
+# .respect order operation from https://github.com/YunoHost/example_ynh/blob/master/scripts/install (this is just style)
+# .every sudo can be removed, they are not usefull anymore (everything is run as root)
+# .use this helper for nginx: ynh_add_nginx_config (doc: https://helpers.yunohost.org/), it will requiere to rename document_root in final_path
+# .use this helper for debian packages: ynh_install_app_dependencies (doc: https://helpers.yunohost.org/), mostly to make sure you dont remove usefull package for other application (or the other way around)
+# .use PIP, here is an example https://github.com/YunoHost-Apps/weblate_ynh/blob/master/scripts/install#L196
+
 #=================================================
 # GENERIC START
 #=================================================
