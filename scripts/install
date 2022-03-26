@@ -1,12 +1,5 @@
 #!/bin/bash
 
-# Here are some advices about the packaging:
-# .respect order operation from https://github.com/YunoHost/example_ynh/blob/master/scripts/install (this is just style)
-# .every sudo can be removed, they are not usefull anymore (everything is run as root)
-# .use this helper for nginx: ynh_add_nginx_config (doc: https://helpers.yunohost.org/), it will requiere to rename document_root in final_path
-# .use this helper for debian packages: ynh_install_app_dependencies (doc: https://helpers.yunohost.org/), mostly to make sure you dont remove usefull package for other application (or the other way around)
-# .use PIP, here is an example https://github.com/YunoHost-Apps/weblate_ynh/blob/master/scripts/install#L196
-
 #=================================================
 # GENERIC START
 #=================================================
@@ -28,59 +21,118 @@ ynh_abort_if_errors
 #=================================================
 
 domain=$YNH_APP_ARG_DOMAIN
-path=$YNH_APP_ARG_PATH
+path_url=$YNH_APP_ARG_PATH
 is_public=$YNH_APP_ARG_IS_PUBLIC
 author=$YNH_APP_ARG_AUTHOR
 title=$YNH_APP_ARG_TITLE
 
 app=$YNH_APP_INSTANCE_NAME
 
-#force location to be / or /foo
-location=${path:-/}
+#=================================================
+# CHECK IF THE APP CAN BE INSTALLED WITH THESE ARGS
+#=================================================
+ynh_script_progression --message="Validating installation parameters..."
 
-# Check domain/path availability
-sudo yunohost app checkurl $domain$path -a $app \
-    || ynh_die "The path ${domain}${path} is not available for app installation."
+final_path=/var/www/$app
+test ! -e "$final_path" || ynh_die --message="This path already contains a folder"
 
-# Document root
-document_root=/var/www/$app
+# Register (book) web path
+ynh_webpath_register --app=$app --domain=$domain --path_url=$path_url
+
+#=================================================
+# STORE SETTINGS FROM MANIFEST
+#=================================================
+ynh_script_progression --message="Storing installation settings..."
+
+ynh_app_setting_set --app=$app --key=domain --value=$domain
+ynh_app_setting_set --app=$app --key=path --value=$path_url
+ynh_app_setting_set --app=$app --key=author --value=$author
+ynh_app_setting_set --app=$app --key=title --value=$title
+
+#=================================================
+# STANDARD MODIFICATIONS
+#=================================================
+# INSTALL DEPENDENCIES
+#=================================================
+ynh_script_progression --message="Installing dependencies..."
+
+ynh_install_app_dependencies $pkg_dependencies
+
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Configuring system user..."
+
+# Create a system user
+ynh_system_user_create --username=$app --home_dir="$final_path"
+
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
+ynh_script_progression --message="Setting up source files..."
+
+ynh_app_setting_set --app=$app --key=final_path --value=$final_path
 date=`date +%Y-%m-%d`
-sudo mkdir -p $document_root
-sudo sed -i "s@YNH_APP_URL@https://${domain}${path}@g" ../sources/pelicanconf.py
-sudo sed -i "s@YNH_APP_AUTHOR@$author@g" ../sources/pelicanconf.py
-sudo sed -i "s@YNH_APP_SITENAME@$title@g" ../sources/pelicanconf.py
-sudo sed -i "s@YNH_APP_AUTHOR@$author@g" ../sources/content/first-article.md
-sudo sed -i "s@YNH_APP_DATE@$date@g" ../sources/content/first-article.md
-sudo cp -a ../sources/. $document_root
+mkdir -p $final_path
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/publishconf.py"
+ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="../sources/publishconf.py"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/pelicanconf.py"
+ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="../sources/pelicanconf.py"
+ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/pelicanconf.py"
+ynh_replace_string --match_string="__TITLE__" --replace_string="$title" --target_file="../sources/pelicanconf.py"
+ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/content/first-article.md"
+ynh_replace_string --match_string="__DATE__" --replace_string="$date" --target_file="../sources/content/first-article.md"
+cp -a ../sources/. $final_path
 
-# Nginx configuration
-sed -i "s@YNH_LOCATION@$location@g" ../conf/nginx.conf
-sed -i "s@YNH_DOCUMENT_ROOT@$document_root/output/@g" ../conf/nginx.conf
-sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Configuring NGINX web server..."
 
-# Store settings from manifest
-ynh_app_setting_set $app domain $domain
-ynh_app_setting_set $app path $path
-ynh_app_setting_set $app is_public $is_public
-ynh_app_setting_set $app author $author
+# Create a dedicated NGINX config
+ynh_add_nginx_config
 
-# Install python dependencies
-sudo apt-get install -y python-pip python-virtualenv python-dev libldap2-dev libsasl2-dev libssl-dev
+#=================================================
+# SPECIFIC SETUP
+#=================================================
+# BUILD APP
+#=================================================
+ynh_script_progression --message="Building app..."
 
-# Install pelican
-pip install pelican markdown
-
-# Generate the blog
-cd $document_root
-pelican -s pelicanconf.py -D
+pushd $final_path
+	python3 -m venv $final_path/venv
+	source $final_path/venv/bin/activate
+	pip install --upgrade pip
+	ynh_exec_warn_less pip install pelican markdown
+	pelican -s pelicanconf.py -D
+popd
 
 # Set permissions
-sudo chmod 775 -R $document_root
-sudo chown -hR www-data:www-data $document_root
+chmod 775 -R $final_path
+chown -hR www-data:www-data $final_path
+
+#=================================================
+# SETUP SSOWAT
+#=================================================
+ynh_script_progression --message="Configuring permissions..."
 
 # Make app public if necessary
-[[ $is_public -eq 1 ]] \
-  && ynh_app_setting_set "$app" unprotected_uris "/"
-  
-# Reload Nginx and regenerate SSOwat conf
-sudo service nginx reload
+if [ $is_public -eq 1 ]
+then
+	# Everyone can access the app.
+	# The "main" permission is automatically created before the install script.
+	ynh_permission_update --permission="main" --add="visitors"
+fi
+
+#=================================================
+# RELOAD NGINX
+#=================================================
+ynh_script_progression --message="Reloading NGINX web server..."
+
+ynh_systemd_action --service_name=nginx --action=reload
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Installation of $app completed"

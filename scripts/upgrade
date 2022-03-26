@@ -6,50 +6,38 @@
 # IMPORT GENERIC HELPERS
 #=================================================
 
+source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
 # LOAD SETTINGS
 #=================================================
+ynh_script_progression --message="Loading installation settings..."
 
 app=$YNH_APP_INSTANCE_NAME
 
-domain=$(ynh_app_setting_get $app domain)
-path_url=$(ynh_app_setting_get $app path)
-admin=$(ynh_app_setting_get $app admin)
-is_public=$(ynh_app_setting_get $app is_public)
-final_path=$(ynh_app_setting_get $app final_path)
-port=$(ynh_app_setting_get $app port)
-author=$(ynh_app_setting_get $app author)
-title=$(ynh_app_setting_get $app title)
+domain=$(ynh_app_setting_get --app=$app --key=domain)
+path_url=$(ynh_app_setting_get --app=$app --key=path)
+final_path=$(ynh_app_setting_get --app=$app --key=final_path)
+author=$(ynh_app_setting_get --app=$app a--key=uthor)
+title=$(ynh_app_setting_get --app=$app --key=title)
 
 #=================================================
-# ENSURE DOWNWARD COMPATIBILITY
+# CHECK VERSION
 #=================================================
+ynh_script_progression --message="Checking version..."
 
-# Fix is_public as a boolean value
-if [ "$is_public" = "Yes" ]; then
-	ynh_app_setting_set $app is_public 1
-	is_public=1
-elif [ "$is_public" = "No" ]; then
-	ynh_app_setting_set $app is_public 0
-	is_public=0
-fi
-
-# If final_path doesn't exist, create it
-if [ -z $final_path ]; then
-	final_path=/var/www/$app
-	ynh_app_setting_set $app final_path $final_path
-fi
+upgrade_type=$(ynh_check_app_version_changed)
 
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
+ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
 
 # Backup the current version of the app
 ynh_backup_before_upgrade
 ynh_clean_setup () {
-	# restore it if the upgrade fails
+	# Restore it if the upgrade fails
 	ynh_restore_upgradebackup
 }
 # Exit if an error occurs during the execution of the script
@@ -58,38 +46,95 @@ ynh_abort_if_errors
 #=================================================
 # STANDARD UPGRADE STEPS
 #=================================================
+# ENSURE DOWNWARD COMPATIBILITY
+#=================================================
+ynh_script_progression --message="Ensuring downward compatibility..."
 
-#force location to be / or /foo
-location=${path:-/}
+# Cleaning legacy permissions
+if ynh_legacy_permissions_exists; then
+	ynh_legacy_permissions_delete_all
 
-# Document root
-document_root=/var/www/$app
-sudo mkdir -p $document_root
+	ynh_app_setting_delete --app=$app --key=is_public
+fi
 
-# Nginx configuration
-sed -i "s@YNH_LOCATION@$location@g" ../conf/nginx.conf
-sed -i "s@YNH_DOCUMENT_ROOT@$document_root/output/@g" ../conf/nginx.conf
-sudo cp ../conf/nginx.conf /etc/nginx/conf.d/$domain.d/$app.conf
+#=================================================
+# CREATE DEDICATED USER
+#=================================================
+ynh_script_progression --message="Making sure dedicated system user exists..."
 
-# Store settings from manifest
-ynh_app_setting_set $app domain $domain
-ynh_app_setting_set $app path $path
-ynh_app_setting_set $app is_public $is_public
-ynh_app_setting_set $app author $author
+# Create a dedicated user (if not existing)
+ynh_system_user_create --username=$app --home_dir="$final_path"
 
-# Install python dependencies
-sudo apt-get install -y python-pip python-virtualenv python-dev libldap2-dev libsasl2-dev libssl-dev
+#=================================================
+# DOWNLOAD, CHECK AND UNPACK SOURCE
+#=================================================
 
-# Upgrade pelican
-pip install --upgrade pelican markdown
+if [ "$upgrade_type" == "UPGRADE_APP" ]
+then
+	ynh_script_progression --message="Upgrading source files..."
+
+	# Download, check integrity, uncompress and patch the source from app.src
+	date=`date +%Y-%m-%d`
+	mkdir -p $final_path
+	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/pelicanconf.py"
+	ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="../sources/pelicanconf.py"
+	ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/pelicanconf.py"
+	ynh_replace_string --match_string="__TITEL__" --replace_string="$title" --target_file="../sources/pelicanconf.py"
+	ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/content/first-article.md"
+	ynh_replace_string --match_string="__DATE__" --replace_string="$date" --target_file="../sources/content/first-article.md"
+	cp -a ../sources/. $final_path
+fi
+
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
+
+#=================================================
+# NGINX CONFIGURATION
+#=================================================
+ynh_script_progression --message="Upgrading NGINX web server configuration..."
+
+# Create a dedicated NGINX config
+ynh_add_nginx_config
+
+#=================================================
+# UPGRADE DEPENDENCIES
+#=================================================
+ynh_script_progression --message="Upgrading dependencies..."
+
+ynh_install_app_dependencies $pkg_dependencies
+
+#=================================================
+# SPECIFIC UPGRADE
+#=================================================
+# BUILD APP
+#=================================================
+ynh_script_progression --message="Building app..."
+
+pushd $final_path
+	ynh_secure_remove --file="$final_path/venv"
+	python3 -m venv $final_path/venv
+	source $final_path/venv/bin/activate
+	pip install --upgrade pip
+	ynh_exec_warn_less pip install pelican markdown
+	pelican -s pelicanconf.py -D
+popd
 
 # Set permissions
-sudo chmod 775 -R $document_root
-sudo chown -hR www-data:www-data $document_root
+chmod 775 -R $final_path
+chown -hR www-data:www-data $final_path
 
-# Make app public if necessary
-[[ $is_public -eq 1 ]] \
-  && ynh_app_setting_set "$app" unprotected_uris "/"
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# RELOAD NGINX
+#=================================================
+ynh_script_progression --message="Reloading NGINX web server..."
 
-# Reload Nginx and regenerate SSOwat conf
-sudo service nginx reload
+ynh_systemd_action --service_name=nginx --action=reload
+
+#=================================================
+# END OF SCRIPT
+#=================================================
+
+ynh_script_progression --message="Upgrade of $app completed"

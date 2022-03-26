@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*- #
 from __future__ import unicode_literals
 
-AUTHOR = u'YNH_APP_AUTHOR'
-SITENAME = u'YNH_APP_SITENAME'
-SITEURL = 'YNH_APP_URL'
+AUTHOR = u'__AUTHOR__'
+SITENAME = u'__TITLE__'
+SITEURL = 'https://__DOMAIN____PATH__/'
 
 PATH = 'content'
 
@@ -20,9 +20,9 @@ AUTHOR_FEED_ATOM = None
 AUTHOR_FEED_RSS = None
 
 # Blogroll
-LINKS = (('Pelican', 'http://getpelican.com/'),
-         ('Python.org', 'http://python.org/'),
-         ('Jinja2', 'http://jinja.pocoo.org/'),
+LINKS = (('Pelican', 'https://getpelican.com/'),
+         ('Python.org', 'https://www.python.org/'),
+         ('Jinja2', 'https://palletsprojects.com/p/jinja/'),
          ('You can modify those links in your config file', '#'),)
 
 # Social widget
