@@ -3,7 +3,7 @@
 		domain="domain.tld"
 		path="/path"
 		is_public=1
-		author="john"
+		author="package_checker"
 		title="My personal website"
 	; Checks
 		pkg_linter=1
