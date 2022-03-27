@@ -3,14 +3,14 @@
     "id": "pelican",
     "packaging_format": 1,
     "description": {
-        "en": "Pelican Static Site Generator",
-        "fr": "Pelican, un générateur de blog statique"
+        "en": "Static Site Generator",
+        "fr": "Générateur de blog statique"
     },
-    "version": "1.0",
-    "url": "https://blog.getpelican.com/",
+    "version": "1.0~ynh2",
+    "url": "https://blog.getpelican.com",
     "upstream": {
         "license": "AGPL-3.0-or-later",
-        "website": "https://blog.getpelican.com/",
+        "website": "https://blog.getpelican.com",
         "admindoc": "https://docs.getpelican.com/en/latest/index.html",
         "code": "https://github.com/getpelican/pelican"
     },
