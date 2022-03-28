@@ -76,6 +76,8 @@ then
 	# Download, check integrity, uncompress and patch the source from app.src
 	date=`date +%Y-%m-%d`
 	mkdir -p $final_path
+	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/publishconf.py"
+	ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="../sources/publishconf.py"
 	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/pelicanconf.py"
 	ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="../sources/pelicanconf.py"
 	ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/pelicanconf.py"
@@ -120,9 +122,9 @@ pushd $final_path
 	pelican -s pelicanconf.py -D
 popd
 
-# Set permissions
-chmod 775 -R $final_path
-chown -hR www-data:www-data $final_path
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
 
 #=================================================
 # GENERIC FINALIZATION

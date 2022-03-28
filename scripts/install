@@ -84,6 +84,10 @@ ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --targ
 ynh_replace_string --match_string="__DATE__" --replace_string="$date" --target_file="../sources/content/first-article.md"
 cp -a ../sources/. $final_path
 
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
+
 #=================================================
 # NGINX CONFIGURATION
 #=================================================
@@ -107,10 +111,12 @@ pushd $final_path
 	pelican -s pelicanconf.py -D
 popd
 
-# Set permissions
-chmod 775 -R $final_path
-chown -hR www-data:www-data $final_path
+chmod 750 "$final_path"
+chmod -R o-rwx "$final_path"
+chown -R $app:www-data "$final_path"
 
+#=================================================
+# GENERIC FINALIZATION
 #=================================================
 # SETUP SSOWAT
 #=================================================
