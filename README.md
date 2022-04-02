@@ -23,7 +23,7 @@ Pelican is a static site generator, written in Python_.
 * Completely static output is simple to host anywhere
 
 
-**Shipped version:** 1.0~ynh2
+**Shipped version:** 1.0~ynh3
 
 
 
