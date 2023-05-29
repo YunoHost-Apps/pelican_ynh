@@ -16,13 +16,15 @@ ynh_script_progression --message="Setting up source files..."
 
 date=`date +%Y-%m-%d`
 mkdir -p $install_dir
-
-cp -a ../sources/content/ $install_dir/content/
-ynh_add_config --template="../sources/pelicanconf.py" --destination="$install_dir"
-ynh_add_config --template="../sources/publishconf.py" --destination="$install_dir"
-ynh_add_config --template="../sources/content/first-article.md" --destination="$install_dir/content/first-article.md"
-ynh_add_config --template="../sources/Makefile" --destination="$install_dir/Makefile"
-ynh_add_config --template="../sources/tasks.py" --destination="$install_dir/content/tasks.py"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/publishconf.py"
+ynh_replace_string --match_string="__PATH__" --replace_string="$path" --target_file="../sources/publishconf.py"
+ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/pelicanconf.py"
+ynh_replace_string --match_string="__PATH__" --replace_string="$path" --target_file="../sources/pelicanconf.py"
+ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/pelicanconf.py"
+ynh_replace_string --match_string="__TITLE__" --replace_string="$title" --target_file="../sources/pelicanconf.py"
+ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/content/first-article.md"
+ynh_replace_string --match_string="__DATE__" --replace_string="$date" --target_file="../sources/content/first-article.md"
+cp -a ../sources/. $install_dir
 
 chmod 750 "$install_dir"
 chmod -R o-rwx "$install_dir"
