@@ -54,5 +54,8 @@ ram.runtime = "50M"
 
     [resources.install_dir]
 
+    [resources.permissions]
+    main.url = "/"
+
     [resources.apt]
     packages = "python3-pip python3-virtualenv python3-dev libldap2-dev libsasl2-dev libssl-dev python3-venv"
