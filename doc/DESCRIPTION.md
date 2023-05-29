@@ -1,4 +1,4 @@
-Pelican is a static site generator, written in Python_.
+Pelican is a static site generator, written in Python.
 
 * Compose content in Markdown_ or reStructuredText_ using your editor of choice
 * Simple command-line tool (re)generates HTML, CSS, and JS from your source content

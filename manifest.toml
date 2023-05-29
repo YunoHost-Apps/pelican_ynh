@@ -1,0 +1,61 @@
+packaging_format = 2
+
+id = "pelican"
+name = "Pelican"
+description.en = "Static Site Generator"
+description.fr = "Générateur de blog statique"
+
+version = "4.8.0~ynh1"
+
+maintainers = ["Ylies Chahi"]
+
+[upstream]
+license = "AGPL-3.0-or-later"
+website = "https://blog.getpelican.com"
+admindoc = "https://docs.getpelican.com/en/latest/index.html"
+code = "https://github.com/getpelican/pelican"
+
+[integration]
+yunohost = ">= 11.1.19"
+architectures = "all"
+multi_instance = true
+ldap = false
+sso = true
+disk = "50M"
+ram.build = "50M"
+ram.runtime = "50M"
+
+[install]
+    [install.domain]
+    type = "domain"
+
+    [install.path]
+    type = "path"
+    default = "/pelican"
+
+    [install.init_main_permission]
+    type = "group"
+    default = "visitors"
+
+    [install.author]
+    ask.en = "Choose an author"
+    ask.fr = "Choisissez l'auteur"
+    type = "user"
+    default = "John Doe"
+
+    [install.title]
+    ask.en = "Choose a default title for your website"
+    ask.fr = "Choisissez le titre par défaut de votre site"
+    type = "string"
+    example = "My personal website"
+
+[resources]
+    [resources.system_user]
+
+    [resources.install_dir]
+
+    [resources.permissions]
+    main.url = "/"
+
+    [resources.apt]
+    packages = "python3-pip python3-virtualenv python3-dev libldap2-dev libsasl2-dev libssl-dev python3-venv"
