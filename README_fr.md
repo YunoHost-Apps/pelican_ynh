@@ -16,7 +16,7 @@ Si vous n’avez pas YunoHost, regardez [ici](https://yunohost.org/#/install) po
 
 ## Vue d’ensemble
 
-Pelican is a static site generator, written in Python_.
+Pelican is a static site generator, written in Python.
 
 * Compose content in Markdown_ or reStructuredText_ using your editor of choice
 * Simple command-line tool (re)generates HTML, CSS, and JS from your source content
@@ -24,7 +24,7 @@ Pelican is a static site generator, written in Python_.
 * Completely static output is simple to host anywhere
 
 
-**Version incluse :** 1.0~ynh3
+**Version incluse :** 4.8.0~ynh1
 ## Documentations et ressources
 
 * Site officiel de l’app : <https://blog.getpelican.com>
