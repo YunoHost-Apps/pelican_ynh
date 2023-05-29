@@ -3,7 +3,7 @@ Date: __DATE__
 Slug: your-first-article
 Author: __AUTHOR__
 
-This is your first article, congrats! You can now start working on your blog, editing your content and enjoy your fresh install of Pelican !  
+This is your first article, congrats! You can now start working on your blog, editing your content and enjoy your fresh install of Pelican!  
 
 ## More informations about Pelican
 
