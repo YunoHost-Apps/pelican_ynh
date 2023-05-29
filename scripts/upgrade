@@ -12,15 +12,15 @@ source /usr/share/yunohost/helpers
 #=================================================
 # LOAD SETTINGS
 #=================================================
-ynh_script_progression --message="Loading installation settings..."
+#REMOVEME? ynh_script_progression --message="Loading installation settings..."
 
-app=$YNH_APP_INSTANCE_NAME
+#REMOVEME? app=$YNH_APP_INSTANCE_NAME
 
-domain=$(ynh_app_setting_get --app=$app --key=domain)
-path_url=$(ynh_app_setting_get --app=$app --key=path)
-final_path=$(ynh_app_setting_get --app=$app --key=final_path)
-author=$(ynh_app_setting_get --app=$app a--key=uthor)
-title=$(ynh_app_setting_get --app=$app --key=title)
+#REMOVEME? domain=$(ynh_app_setting_get --app=$app --key=domain)
+#REMOVEME? path=$(ynh_app_setting_get --app=$app --key=path)
+#REMOVEME? #REMOVEME? install_dir=$(ynh_app_setting_get --app=$app --key=install_dir)
+#REMOVEME? author=$(ynh_app_setting_get --app=$app a--key=uthor)
+#REMOVEME? title=$(ynh_app_setting_get --app=$app --key=title)
 
 #=================================================
 # CHECK VERSION
@@ -32,16 +32,16 @@ upgrade_type=$(ynh_check_app_version_changed)
 #=================================================
 # BACKUP BEFORE UPGRADE THEN ACTIVE TRAP
 #=================================================
-ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
+#REMOVEME? ynh_script_progression --message="Backing up the app before upgrading (may take a while)..."
 
 # Backup the current version of the app
-ynh_backup_before_upgrade
-ynh_clean_setup () {
+#REMOVEME? ynh_backup_before_upgrade
+#REMOVEME? ynh_clean_setup () {
 	# Restore it if the upgrade fails
-	ynh_restore_upgradebackup
+#REMOVEME? 	ynh_restore_upgradebackup
 }
 # Exit if an error occurs during the execution of the script
-ynh_abort_if_errors
+#REMOVEME? ynh_abort_if_errors
 
 #=================================================
 # STANDARD UPGRADE STEPS
@@ -51,8 +51,8 @@ ynh_abort_if_errors
 ynh_script_progression --message="Ensuring downward compatibility..."
 
 # Cleaning legacy permissions
-if ynh_legacy_permissions_exists; then
-	ynh_legacy_permissions_delete_all
+#REMOVEME? if ynh_legacy_permissions_exists; then
+#REMOVEME? 	ynh_legacy_permissions_delete_all
 
 	ynh_app_setting_delete --app=$app --key=is_public
 fi
@@ -60,10 +60,10 @@ fi
 #=================================================
 # CREATE DEDICATED USER
 #=================================================
-ynh_script_progression --message="Making sure dedicated system user exists..."
+#REMOVEME? ynh_script_progression --message="Making sure dedicated system user exists..."
 
 # Create a dedicated user (if not existing)
-ynh_system_user_create --username=$app --home_dir="$final_path"
+#REMOVEME? ynh_system_user_create --username=$app --home_dir="$install_dir"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
@@ -75,21 +75,21 @@ then
 
 	# Download, check integrity, uncompress and patch the source from app.src
 	date=`date +%Y-%m-%d`
-	mkdir -p $final_path
+	mkdir -p $install_dir
 	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/publishconf.py"
-	ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="../sources/publishconf.py"
+	ynh_replace_string --match_string="__PATH__" --replace_string="$path" --target_file="../sources/publishconf.py"
 	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/pelicanconf.py"
-	ynh_replace_string --match_string="__PATH__" --replace_string="$path_url" --target_file="../sources/pelicanconf.py"
+	ynh_replace_string --match_string="__PATH__" --replace_string="$path" --target_file="../sources/pelicanconf.py"
 	ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/pelicanconf.py"
 	ynh_replace_string --match_string="__TITEL__" --replace_string="$title" --target_file="../sources/pelicanconf.py"
 	ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/content/first-article.md"
 	ynh_replace_string --match_string="__DATE__" --replace_string="$date" --target_file="../sources/content/first-article.md"
-	cp -a ../sources/. $final_path
+	cp -a ../sources/. $install_dir
 fi
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data "$final_path"
+chmod 750 "$install_dir"
+chmod -R o-rwx "$install_dir"
+chown -R $app:www-data "$install_dir"
 
 #=================================================
 # NGINX CONFIGURATION
@@ -102,9 +102,9 @@ ynh_add_nginx_config
 #=================================================
 # UPGRADE DEPENDENCIES
 #=================================================
-ynh_script_progression --message="Upgrading dependencies..."
+#REMOVEME? ynh_script_progression --message="Upgrading dependencies..."
 
-ynh_install_app_dependencies $pkg_dependencies
+#REMOVEME? ynh_install_app_dependencies $pkg_dependencies
 
 #=================================================
 # SPECIFIC UPGRADE
@@ -113,27 +113,27 @@ ynh_install_app_dependencies $pkg_dependencies
 #=================================================
 ynh_script_progression --message="Building app..."
 
-pushd $final_path
-	ynh_secure_remove --file="$final_path/venv"
-	python3 -m venv $final_path/venv
-	source $final_path/venv/bin/activate
+pushd $install_dir
+#REMOVEME? 	ynh_secure_remove --file="$install_dir/venv"
+	python3 -m venv $install_dir/venv
+	source $install_dir/venv/bin/activate
 	pip install --upgrade pip
 	ynh_exec_warn_less pip install pelican markdown
 	pelican -s pelicanconf.py -D
 popd
 
-chmod 750 "$final_path"
-chmod -R o-rwx "$final_path"
-chown -R $app:www-data "$final_path"
+chmod 750 "$install_dir"
+chmod -R o-rwx "$install_dir"
+chown -R $app:www-data "$install_dir"
 
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
 # RELOAD NGINX
 #=================================================
-ynh_script_progression --message="Reloading NGINX web server..."
+#REMOVEME? ynh_script_progression --message="Reloading NGINX web server..."
 
-ynh_systemd_action --service_name=nginx --action=reload
+#REMOVEME? ynh_systemd_action --service_name=nginx --action=reload
 
 #=================================================
 # END OF SCRIPT
