@@ -64,7 +64,7 @@ ynh_add_nginx_config
 # Create a dedicated systemd config
 ynh_add_systemd_config
 
-yunohost service add $app --description="$app monitor, to automatically rebuild your website" --log="/var/log/$app/$app.log"
+yunohost service add $app --description="$app monitor, to automatically rebuild your website"
 
 #=================================================
 # GENERIC FINALIZATION

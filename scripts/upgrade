@@ -83,7 +83,7 @@ ynh_add_nginx_config
 # Create a dedicated systemd config
 ynh_add_systemd_config
 
-yunohost service add $app --description="$app monitor, to automatically rebuild your website" --log="/var/log/$app/$app.log"
+yunohost service add $app --description="$app monitor, to automatically rebuild your website"
 
 #=================================================
 # GENERIC FINALIZATION
@@ -93,7 +93,7 @@ yunohost service add $app --description="$app monitor, to automatically rebuild 
 ynh_script_progression --message="Starting a systemd service..." --weight=1
 
 # Start a systemd service
-ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$app/$app.log"
+ynh_systemd_action --service_name=$app --action="start"
 
 #=================================================
 # END OF SCRIPT

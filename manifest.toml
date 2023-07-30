@@ -41,7 +41,6 @@ ram.runtime = "50M"
     ask.en = "Choose an author"
     ask.fr = "Choisissez l'auteur"
     type = "user"
-    default = "John Doe"
 
     [install.title]
     ask.en = "Choose a default title for your website"
