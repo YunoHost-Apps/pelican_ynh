@@ -51,6 +51,8 @@ ram.runtime = "50M"
 
 [resources]
     [resources.system_user]
+    allow_ssh = true
+    allow_sftp = true
 
     [resources.install_dir]
 

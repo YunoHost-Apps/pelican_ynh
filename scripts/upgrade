@@ -16,12 +16,19 @@ source /usr/share/yunohost/helpers
 upgrade_type=$(ynh_check_app_version_changed)
 
 #=================================================
+# STOP SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Stopping a systemd service..." --weight=1
+
+ynh_systemd_action --service_name=$app --action="stop" --log_path="/var/log/$app/$app.log"
+
+#=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
 if [ "$upgrade_type" == "UPGRADE_APP" ]
 then
-	ynh_script_progression --message="Upgrading source files..."
+	ynh_script_progression --message="Upgrading source files..." --weight=1
 
 	# Download, check integrity, uncompress and patch the source from app.src
 	date=`date +%Y-%m-%d`
@@ -37,24 +44,19 @@ then
 	cp -a ../sources/. $install_dir
 fi
 
+# Somehow this directory is monitored, but not present upon install
+[ ! -d "$install_dir/content/images" ] && mkdir -p "$install_dir/content/images"
+
 chmod 750 "$install_dir"
 chmod -R o-rwx "$install_dir"
 chown -R $app:www-data "$install_dir"
-
-#=================================================
-# NGINX CONFIGURATION
-#=================================================
-ynh_script_progression --message="Upgrading NGINX web server configuration..."
-
-# Create a dedicated NGINX config
-ynh_add_nginx_config
 
 #=================================================
 # SPECIFIC UPGRADE
 #=================================================
 # BUILD APP
 #=================================================
-ynh_script_progression --message="Building app..."
+ynh_script_progression --message="Building app..." --weight=2
 
 pushd $install_dir
 	ynh_secure_remove --file="$install_dir/venv"
@@ -63,11 +65,35 @@ pushd $install_dir
 	pip install --upgrade pip
 	ynh_exec_warn_less pip install pelican markdown
 	pelican -s pelicanconf.py -D
+	deactivate
 popd
 
 chmod 750 "$install_dir"
 chmod -R o-rwx "$install_dir"
 chown -R $app:www-data "$install_dir"
+
+#=================================================
+# SYSTEM CONFIGURATION
+#=================================================
+ynh_script_progression --message="Adding system configurations related to $app..." --weight=1
+
+# Create a dedicated NGINX config
+ynh_add_nginx_config
+
+# Create a dedicated systemd config
+ynh_add_systemd_config
+
+yunohost service add $app --description="$app monitor, to automatically rebuild your website" --log="/var/log/$app/$app.log"
+
+#=================================================
+# GENERIC FINALIZATION
+#=================================================
+# START SYSTEMD SERVICE
+#=================================================
+ynh_script_progression --message="Starting a systemd service..." --weight=1
+
+# Start a systemd service
+ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$app/$app.log"
 
 #=================================================
 # END OF SCRIPT
