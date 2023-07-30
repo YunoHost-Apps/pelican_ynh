@@ -38,7 +38,7 @@ then
 	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/pelicanconf.py"
 	ynh_replace_string --match_string="__PATH__" --replace_string="$path" --target_file="../sources/pelicanconf.py"
 	ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/pelicanconf.py"
-	ynh_replace_string --match_string="__TITEL__" --replace_string="$title" --target_file="../sources/pelicanconf.py"
+	ynh_replace_string --match_string="__TITLE__" --replace_string="$title" --target_file="../sources/pelicanconf.py"
 	ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/content/first-article.md"
 	ynh_replace_string --match_string="__DATE__" --replace_string="$date" --target_file="../sources/content/first-article.md"
 	cp -a ../sources/. $install_dir
