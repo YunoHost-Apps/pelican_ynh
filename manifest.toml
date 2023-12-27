@@ -16,11 +16,14 @@ admindoc = "https://docs.getpelican.com/en/latest/index.html"
 code = "https://github.com/getpelican/pelican"
 
 [integration]
-yunohost = ">= 11.1.19"
+yunohost = ">= 11.2"
 architectures = "all"
 multi_instance = true
+
 ldap = false
+
 sso = true
+
 disk = "50M"
 ram.build = "50M"
 ram.runtime = "50M"
@@ -59,4 +62,4 @@ ram.runtime = "50M"
     main.url = "/"
 
     [resources.apt]
-    packages = "python3-pip python3-virtualenv python3-dev libldap2-dev libsasl2-dev libssl-dev python3-venv"
+    packages = "python3-pip, python3-virtualenv, python3-dev, libldap2-dev, libsasl2-dev, libssl-dev, python3-venv"
