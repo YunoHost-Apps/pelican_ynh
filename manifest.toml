@@ -5,7 +5,7 @@ name = "Pelican"
 description.en = "Static Site Generator"
 description.fr = "Générateur de blog statique"
 
-version = "4.9.1 ~ynh1"
+version = "4.9.1~ynh1"
 
 maintainers = ["Ylies Chahi"]
 
