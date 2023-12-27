@@ -30,7 +30,7 @@ Pelican is a static site generator, written in Python.
 * Site officiel de l’app : <https://blog.getpelican.com>
 * Documentation officielle de l’admin : <https://docs.getpelican.com/en/latest/index.html>
 * Dépôt de code officiel de l’app : <https://github.com/getpelican/pelican>
-* Documentation YunoHost pour cette app : <https://yunohost.org/app_pelican>
+* YunoHost Store: <https://apps.yunohost.org/app/pelican>
 * Signaler un bug : <https://github.com/YunoHost-Apps/pelican_ynh/issues>
 
 ## Informations pour les développeurs
