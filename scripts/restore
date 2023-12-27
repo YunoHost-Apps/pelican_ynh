@@ -13,11 +13,15 @@ source /usr/share/yunohost/helpers
 #=================================================
 # STANDARD RESTORATION STEPS
 #=================================================
-# RESTORE THE NGINX CONFIGURATION
+# RESTORE THE SYSTEM CONFIGURATIONS
 #=================================================
-ynh_script_progression --message="Restoring the NGINX web server configuration..."
+ynh_script_progression --message="Restoring system configurations related to $app..." --weight=1
 
 ynh_restore_file --origin_path="/etc/nginx/conf.d/$domain.d/$app.conf"
+
+ynh_restore_file --origin_path="/etc/systemd/system/$app.service"
+systemctl enable $app.service --quiet
+yunohost service add $app --description="$app monitor, to automatically rebuild your website"
 
 #=================================================
 # RESTORE THE APP MAIN DIR
@@ -32,11 +36,12 @@ chown -R $app:www-data "$install_dir"
 #=================================================
 # GENERIC FINALIZATION
 #=================================================
-# RELOAD NGINX
+# RELOAD SERVICES
 #=================================================
-ynh_script_progression --message="Reloading NGINX web server..."
+ynh_script_progression --message="Reloading services.."
 
 ynh_systemd_action --service_name=nginx --action=reload
+ynh_systemd_action --service_name=$app --action="start"
 
 #=================================================
 # END OF SCRIPT
