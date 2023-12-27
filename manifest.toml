@@ -5,7 +5,7 @@ name = "Pelican"
 description.en = "Static Site Generator"
 description.fr = "Générateur de blog statique"
 
-version = "4.8.0~ynh1"
+version = "4.9.1~ynh1"
 
 maintainers = ["Ylies Chahi"]
 
@@ -16,11 +16,14 @@ admindoc = "https://docs.getpelican.com/en/latest/index.html"
 code = "https://github.com/getpelican/pelican"
 
 [integration]
-yunohost = ">= 11.1.19"
+yunohost = ">= 11.2"
 architectures = "all"
 multi_instance = true
+
 ldap = false
+
 sso = true
+
 disk = "50M"
 ram.build = "50M"
 ram.runtime = "50M"
@@ -41,7 +44,6 @@ ram.runtime = "50M"
     ask.en = "Choose an author"
     ask.fr = "Choisissez l'auteur"
     type = "user"
-    default = "John Doe"
 
     [install.title]
     ask.en = "Choose a default title for your website"
@@ -51,6 +53,8 @@ ram.runtime = "50M"
 
 [resources]
     [resources.system_user]
+    allow_ssh = true
+    allow_sftp = true
 
     [resources.install_dir]
 
@@ -58,4 +62,4 @@ ram.runtime = "50M"
     main.url = "/"
 
     [resources.apt]
-    packages = "python3-pip python3-virtualenv python3-dev libldap2-dev libsasl2-dev libssl-dev python3-venv"
+    packages = "python3-pip, python3-virtualenv, python3-dev, libldap2-dev, libsasl2-dev, libssl-dev, python3-venv"
