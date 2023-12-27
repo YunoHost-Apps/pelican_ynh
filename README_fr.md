@@ -24,7 +24,7 @@ Pelican is a static site generator, written in Python.
 * Completely static output is simple to host anywhere
 
 
-**Version incluse :** 4.8.0~ynh2
+**Version incluse :** 4.9.1 ~ynh1
 ## Documentations et ressources
 
 * Site officiel de l’app : <https://blog.getpelican.com>
