@@ -35,7 +35,7 @@ chown -R $app:www-data "$install_dir"
 #=================================================
 # BUILD APP
 #=================================================
-ynh_script_progression --message="Building app..." --weight=2
+ynh_script_progression --message="Building $app..." --weight=2
 
 pushd $install_dir
 	python3 -m venv $install_dir/venv
@@ -64,7 +64,7 @@ ynh_add_nginx_config
 # Create a dedicated systemd config
 ynh_add_systemd_config
 
-yunohost service add $app --description="$app monitor, to automatically rebuild your website"
+yunohost service add $app --description="Static Site Generator" --log="/var/log/$app/$app.log"
 
 #=================================================
 # GENERIC FINALIZATION
