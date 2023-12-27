@@ -33,15 +33,20 @@ then
 	# Download, check integrity, uncompress and patch the source from app.src
 	date=`date +%Y-%m-%d`
 	mkdir -p $install_dir
-	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/publishconf.py"
-	ynh_replace_string --match_string="__PATH__" --replace_string="$path" --target_file="../sources/publishconf.py"
-	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/pelicanconf.py"
-	ynh_replace_string --match_string="__PATH__" --replace_string="$path" --target_file="../sources/pelicanconf.py"
-	ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/pelicanconf.py"
-	ynh_replace_string --match_string="__TITLE__" --replace_string="$title" --target_file="../sources/pelicanconf.py"
-	ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/content/first-article.md"
-	ynh_replace_string --match_string="__DATE__" --replace_string="$date" --target_file="../sources/content/first-article.md"
-	cp -a ../sources/. $install_dir
+	#ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/publishconf.py"
+	#ynh_replace_string --match_string="__PATH__" --replace_string="$path" --target_file="../sources/publishconf.py"
+	#ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/pelicanconf.py"
+	#ynh_replace_string --match_string="__PATH__" --replace_string="$path" --target_file="../sources/pelicanconf.py"
+	#ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/pelicanconf.py"
+	#ynh_replace_string --match_string="__TITLE__" --replace_string="$title" --target_file="../sources/pelicanconf.py"
+	#ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/content/first-article.md"
+	#ynh_replace_string --match_string="__DATE__" --replace_string="$date" --target_file="../sources/content/first-article.md"
+	#cp -a ../sources/. $install_dir
+
+	ynh_add_config --template="../sources/Makefile" --destination="$install_dir/Makefile"
+	ynh_add_config --template="../sources/pelicanconf.py" --destination="$install_dir/pelicanconf.py"
+	ynh_add_config --template="../sources/publishconf.py" --destination="$install_dir/publishconf.py"
+	ynh_add_config --template="../sources/tasks.py" --destination="$install_dir/tasks.py"
 fi
 
 # Somehow this directory is monitored, but not present upon install
@@ -56,7 +61,7 @@ chown -R $app:www-data "$install_dir"
 #=================================================
 # BUILD APP
 #=================================================
-ynh_script_progression --message="Building app..." --weight=2
+ynh_script_progression --message="Building $app..." --weight=2
 
 pushd $install_dir
 	ynh_secure_remove --file="$install_dir/venv"
