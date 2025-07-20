@@ -5,6 +5,13 @@ source ../settings/scripts/_common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
+# RESTORE THE APP MAIN DIR
+#=================================================
+ynh_script_progression "Restoring the app main directory..."
+
+ynh_restore "$install_dir"
+
+#=================================================
 # RESTORE THE SYSTEM CONFIGURATIONS
 #=================================================
 ynh_script_progression "Restoring system configurations related to $app..."
@@ -15,13 +22,6 @@ ynh_restore "/etc/systemd/system/$app.service"
 systemctl enable $app.service --quiet
 
 yunohost service add $app --description="Static Site Generator" --log="/var/log/$app/$app.log"
-
-#=================================================
-# RESTORE THE APP MAIN DIR
-#=================================================
-ynh_script_progression "Restoring the app main directory..."
-
-ynh_restore "$install_dir"
 
 #=================================================
 # RELOAD SERVICES
