@@ -1,46 +1,35 @@
 #!/bin/bash
 
-#=================================================
-# GENERIC START
-#=================================================
-# IMPORT GENERIC HELPERS
-#=================================================
-
 source _common.sh
 source /usr/share/yunohost/helpers
 
 #=================================================
-# CHECK VERSION
-#=================================================
-
-upgrade_type=$(ynh_check_app_version_changed)
-
-#=================================================
 # STOP SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Stopping a systemd service..." --weight=1
+ynh_script_progression "Stopping $app's systemd service..."
 
-ynh_systemd_action --service_name=$app --action="stop" --log_path="/var/log/$app/$app.log"
+ynh_systemctl --service=$app --action="stop"
 
 #=================================================
 # DOWNLOAD, CHECK AND UNPACK SOURCE
 #=================================================
 
-if [ "$upgrade_type" == "UPGRADE_APP" ]
+# FIXME: this is still supported but the recommendation is now to *always* re-setup the app sources wether or not the upstream sources changed
+if ynh_app_upstream_version_changed
 then
-	ynh_script_progression --message="Upgrading source files..." --weight=1
+	ynh_script_progression "Upgrading source files..."
 
 	# Download, check integrity, uncompress and patch the source from app.src
 	date=`date +%Y-%m-%d`
 	mkdir -p $install_dir
-	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/publishconf.py"
-	ynh_replace_string --match_string="__PATH__" --replace_string="$path" --target_file="../sources/publishconf.py"
-	ynh_replace_string --match_string="__DOMAIN__" --replace_string="$domain" --target_file="../sources/pelicanconf.py"
-	ynh_replace_string --match_string="__PATH__" --replace_string="$path" --target_file="../sources/pelicanconf.py"
-	ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/pelicanconf.py"
-	ynh_replace_string --match_string="__TITLE__" --replace_string="$title" --target_file="../sources/pelicanconf.py"
-	ynh_replace_string --match_string="__AUTHOR__" --replace_string="$author" --target_file="../sources/content/first-article.md"
-	ynh_replace_string --match_string="__DATE__" --replace_string="$date" --target_file="../sources/content/first-article.md"
+	ynh_replace --match="__DOMAIN__" --replace="$domain" --file="../sources/publishconf.py"
+	ynh_replace --match="__PATH__" --replace="$path" --file="../sources/publishconf.py"
+	ynh_replace --match="__DOMAIN__" --replace="$domain" --file="../sources/pelicanconf.py"
+	ynh_replace --match="__PATH__" --replace="$path" --file="../sources/pelicanconf.py"
+	ynh_replace --match="__AUTHOR__" --replace="$author" --file="../sources/pelicanconf.py"
+	ynh_replace --match="__TITLE__" --replace="$title" --file="../sources/pelicanconf.py"
+	ynh_replace --match="__AUTHOR__" --replace="$author" --file="../sources/content/first-article.md"
+	ynh_replace --match="__DATE__" --replace="$date" --file="../sources/content/first-article.md"
 	cp -a ../sources/. $install_dir
 fi
 
@@ -50,20 +39,17 @@ fi
 chmod 750 "$install_dir"
 chmod -R o-rwx "$install_dir"
 chown -R $app:www-data "$install_dir"
-
-#=================================================
-# SPECIFIC UPGRADE
 #=================================================
 # BUILD APP
 #=================================================
-ynh_script_progression --message="Building app..." --weight=2
+ynh_script_progression "Building app..."
 
 pushd $install_dir
-	ynh_secure_remove --file="$install_dir/venv"
+	ynh_safe_rm "$install_dir/venv"
 	python3 -m venv $install_dir/venv
 	source $install_dir/venv/bin/activate
 	pip install --upgrade pip
-	ynh_exec_warn_less pip install pelican markdown
+	ynh_hide_warnings pip install pelican markdown
 	pelican -s pelicanconf.py -D
 	deactivate
 popd
@@ -71,32 +57,29 @@ popd
 chmod 750 "$install_dir"
 chmod -R o-rwx "$install_dir"
 chown -R $app:www-data "$install_dir"
-
 #=================================================
 # SYSTEM CONFIGURATION
 #=================================================
-ynh_script_progression --message="Adding system configurations related to $app..." --weight=1
+ynh_script_progression "Adding system configurations related to $app..."
 
 # Create a dedicated NGINX config
-ynh_add_nginx_config
+ynh_config_add_nginx
 
 # Create a dedicated systemd config
-ynh_add_systemd_config
+ynh_config_add_systemd
 
 yunohost service add $app --description="Static Site Generator" --log="/var/log/$app/$app.log"
 
 #=================================================
-# GENERIC FINALIZATION
-#=================================================
 # START SYSTEMD SERVICE
 #=================================================
-ynh_script_progression --message="Starting a systemd service..." --weight=1
+ynh_script_progression "Starting $app's systemd service..."
 
 # Start a systemd service
-ynh_systemd_action --service_name=$app --action="start" --log_path="/var/log/$app/$app.log"
+ynh_systemctl --service=$app --action="start"
 
 #=================================================
 # END OF SCRIPT
 #=================================================
 
-ynh_script_progression --message="Upgrade of $app completed"
+ynh_script_progression "Upgrade of $app completed"
